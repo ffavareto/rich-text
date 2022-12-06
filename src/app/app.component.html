@@ -1,1 +1,5 @@
-<app-rich-text></app-rich-text>
+<app-rich-text
+    [initialColor]="initialColor"
+    [textAreaContent]="textAreaContent"
+    (valueChange)="onValueChange($event)"
+></app-rich-text>

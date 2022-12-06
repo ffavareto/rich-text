@@ -1,4 +1,12 @@
-import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    Input,
+    OnInit,
+    ViewChild,
+    Output,
+    EventEmitter
+} from '@angular/core';
 
 @Component({
     selector: 'app-rich-text',
@@ -7,7 +15,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter }
 })
 export class RichTextComponent implements OnInit {
     @ViewChild('textarea') textarea!: ElementRef<HTMLDivElement>;
-    @ViewChild('formatBlock') formatBlock!: ElementRef<HTMLDivElement>;
+    @ViewChild('blockquote') blockquote!: ElementRef<HTMLDivElement>;
     @Input() set initialColor(value: string) {
         this._initialColor = value;
     };
@@ -17,14 +25,14 @@ export class RichTextComponent implements OnInit {
     @Input() type: string = '';
     
     @Output()
-    valueChanged: EventEmitter<string> = new EventEmitter<string>();
+    valueChange: EventEmitter<string> = new EventEmitter<string>();
     
-    public _textAreaContent: string = '';
     public _initialColor: string = '';
+    public _textAreaContent: string = '';
     
     constructor() { }
     
-    ngOnInit(): void {
+    ngOnInit() {
         const formatButtons: NodeListOf<Element> = document.querySelectorAll('.format')
         this.highlighter(formatButtons, true);
     }
@@ -33,7 +41,7 @@ export class RichTextComponent implements OnInit {
         this.textarea.nativeElement.innerHTML = this._textAreaContent;
         if (this.type !== "" && this.type === 'box') {
             this.textarea.nativeElement.style.backgroundColor = this._initialColor;
-            this.formatBlock.nativeElement.style.display = 'none';
+            this.blockquote.nativeElement.style.display = 'none';
         } else {
             this.textarea.nativeElement.style.backgroundColor = 'white';
         }
@@ -56,23 +64,14 @@ export class RichTextComponent implements OnInit {
         return el;
     }
     
-    public modifyText(command: string): void {
+    modifyText(command: string) {
         let styleElement;
         const userSelection = window.getSelection();
-        
-        if (command == 'bold') {
-            styleElement = document.createElement("strong");
-        } else if (command == 'italic') {
-            styleElement = document.createElement("i");
-        }
+        styleElement = document.createElement(command);
         
         if (userSelection && styleElement) {
-            if (
-                command === 'bold' &&
-                userSelection.anchorNode &&
-                this.findParentElement(userSelection.anchorNode, 'strong').parentElement?.localName == 'strong'
-            ) {
-                this.deleteOuterElement(userSelection, (<HTMLElement>this.findParentElement(userSelection.anchorNode, 'strong')));
+            if (userSelection.anchorNode && this.findParentElement(userSelection.anchorNode, command).parentElement?.localName == command) {
+                this.deleteOuterElement(userSelection, (<HTMLElement>this.findParentElement(userSelection.anchorNode, command)));
             } else {
                 const selectedTextRange = userSelection.getRangeAt(0);
                 selectedTextRange.surroundContents(styleElement);
@@ -82,30 +81,37 @@ export class RichTextComponent implements OnInit {
 
     deleteOuterElement(userSelection: Selection, htmlElement: HTMLElement) {
         if (userSelection.anchorNode && userSelection.anchorNode.parentElement) {
-            let text = document.createTextNode(userSelection.anchorNode.parentElement.innerHTML);
+            let el: Node = {} as Node;
 
-            if (userSelection && userSelection.anchorNode && userSelection.anchorNode.parentNode && htmlElement.parentElement?.parentElement) {
-                htmlElement.parentElement.parentElement.appendChild(text);
-                htmlElement.parentElement.parentElement.removeChild(userSelection.anchorNode.parentNode);
+            if(htmlElement.localName) {
+                el = htmlElement;
+            } else {
+                el = document.createTextNode(userSelection.anchorNode.parentElement.innerHTML);
+            }
+
+            if (htmlElement.parentElement && htmlElement.parentElement.parentElement) {
+                htmlElement.parentElement.parentElement.appendChild(el);
+                htmlElement.parentElement.parentElement.removeChild(htmlElement.parentElement);
             }
         }
     }
         
-    public link(linkButton: Element): void {
+    link() {
         let userLink: string | null = prompt("Insira um link");
-        let linkButtonID = linkButton.getAttribute('id');
         
-        if (userLink && linkButtonID) {
+        if (userLink) {
             if (/http/i.test(userLink)) {
-                this.modifyText(linkButtonID);
+                console.log(userLink);
+                // this.modifyText(`<a href="${userLink}" target="blank"></a>`);
             } else {
                 userLink = "http://" + userLink;
-                this.modifyText(linkButtonID);
+                console.log(userLink);
+                // this.modifyText(`<a href="${userLink}" target="blank"></a>`);
             }
         }
     }
         
-    public highlighter(className: NodeListOf<Element>, needsRemoval: boolean): void {
+    highlighter(className: NodeListOf<Element>, needsRemoval: boolean) {
         className.forEach((button) => {
             button.addEventListener("click", () => {
                 
@@ -127,13 +133,13 @@ export class RichTextComponent implements OnInit {
         });
     }
         
-    public highlighterRemover(className: NodeListOf<Element>): void {
+    highlighterRemover(className: NodeListOf<Element>) {
         className.forEach((button) => {
             button.classList.remove("active");
         });
     }
         
-    public update(): void {
+    update() {
         const textArea = document.querySelector('.textarea');
         
         if (textArea) {
@@ -151,7 +157,7 @@ export class RichTextComponent implements OnInit {
             });
         }
         
-        this.valueChanged.emit(this.textarea.nativeElement.innerHTML);
+        this.valueChange.emit(this.textarea.nativeElement.innerHTML);
     }
         
 }
