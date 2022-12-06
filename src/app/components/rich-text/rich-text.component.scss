@@ -1,0 +1,74 @@
+section {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    width: 100%;
+}
+
+header {
+    background: #eee;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    button, input {
+        margin: 2px;
+        cursor: pointer;
+        border-radius: 10px;
+        font-size: 22px;
+        width: 32px;
+        height: 32px;
+        border: 0;
+        
+        &:active {
+            background: #e3e3e3
+        }
+    }
+    
+    button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .tools {
+        display: flex;
+        align-items: center;
+
+        button, input {
+            background: ghostwhite;
+        }
+    }
+    
+    .generate_html {
+        button {
+            padding: 0 10px;
+            line-height: 0;
+            
+            span {
+                font-size: 22px;
+            }
+        }
+    }
+    
+    .foreColor {
+        label {
+            font-size: 8px;
+        }
+    }
+    
+}
+
+.textarea {
+    width: 100%;
+    height: 320px;
+    padding: 32px;
+    resize: none;
+    border: 1px solid #888;
+    outline: none;
+}
+
+.active {
+    background-color: #e0e9ff;
+}
