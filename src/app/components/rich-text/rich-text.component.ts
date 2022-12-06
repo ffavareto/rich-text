@@ -77,6 +77,8 @@ export class RichTextComponent implements OnInit {
                 selectedTextRange.surroundContents(styleElement);
             }
         }
+
+        userSelection?.removeAllRanges();
     }
 
     deleteOuterElement(userSelection: Selection, htmlElement: HTMLElement) {
