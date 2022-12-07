@@ -181,9 +181,11 @@ export class RichTextComponent implements OnInit {
             });
             
             blocks.forEach(block => {
-                block.setAttribute('style', `margin-left: 16px;`);
-                block.setAttribute('style', `padding: 8px;`);
-                block.setAttribute('style', `border-left: 3px solid ${this._initialColor};`);
+                block.style.paddingLeft = '16px';
+                block.style.marginLeft = '16px';
+                block.style.borderLeftColor = `${this._initialColor}`;
+                block.style.borderLeftWidth = '3px';
+                block.style.borderLeftStyle = 'solid';
             });
         }
         
