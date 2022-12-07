@@ -12,26 +12,6 @@ header {
     justify-content: space-between;
     align-items: center;
     
-    button, input {
-        margin: 2px;
-        cursor: pointer;
-        border-radius: 10px;
-        font-size: 22px;
-        width: 32px;
-        height: 32px;
-        border: 0;
-        
-        &:active {
-            background: #e3e3e3
-        }
-    }
-    
-    button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
     .tools {
         display: flex;
         align-items: center;
@@ -39,25 +19,50 @@ header {
         button, input {
             background: ghostwhite;
         }
-    }
-    
-    .generate_html {
-        button {
-            padding: 0 10px;
-            line-height: 0;
+
+        button, input {
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 22px;
+            width: 32px;
+            height: 32px;
+            border: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
             
-            span {
-                font-size: 22px;
+            &:active {
+                filter: brightness(0.9);
             }
         }
     }
-    
-    .foreColor {
-        label {
-            font-size: 8px;
+
+    .generate_html {
+        a {
+            font-size: 12px;
+            background: #91ff47;
+            border: 0;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            &:active {
+                filter: brightness(0.9);
+            }
+
+            img {
+                width: 12px;
+            }
         }
     }
-    
 }
 
 .textarea {
@@ -67,8 +72,4 @@ header {
     resize: none;
     border: 1px solid #888;
     outline: none;
-}
-
-.active {
-    background-color: #e0e9ff;
 }

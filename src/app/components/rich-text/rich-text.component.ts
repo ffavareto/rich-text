@@ -47,33 +47,43 @@ export class RichTextComponent implements OnInit {
         }
     }
 
-    findParentElement(element: Node, value: string): Node {
-        let el: Node = {} as Node;
+    hasTag(element: any, tag: string): boolean {
+        let response: boolean = false;
 
-        if (
-            (<HTMLElement>element).id == 'textarea' ||
-            (element.parentElement && element.parentElement.localName == value)
-        ) {
-            el = element;
+        if (element && element.parentElement && element.parentElement.localName != "textarea" && element.parentElement.localName == tag) {
+            response = true;
         } else {
-            if (element.parentNode) {
-                el = this.findParentElement(element.parentNode, value);
+            if (element && element.parentNode) {
+                response = this.hasTag(element.parentNode, tag);
             }
         }
 
-        return el;
+        return response;
     }
-    
-    modifyText(command: string) {
-        let styleElement;
+
+    modifyText(command: string, link?: string) {
+        // Define a tag a ser inserida/removida
+        let styleElement = document.createElement(command);
+
+        // se for <a> coloca o link do href
+        if (command === 'a' && link) {
+            styleElement.setAttribute('href', link);
+            styleElement.setAttribute('target', '_blank');
+        }
+
+        // Pega o objeto que representa o texto selecionado
         const userSelection = window.getSelection();
-        styleElement = document.createElement(command);
         
+        // Testa se os dois existem para poder prosseguir
         if (userSelection && styleElement) {
-            if (userSelection.anchorNode && this.findParentElement(userSelection.anchorNode, command).parentElement?.localName == command) {
-                this.deleteOuterElement(userSelection, (<HTMLElement>this.findParentElement(userSelection.anchorNode, command)));
+            // Testa se o elemento selecionado possui a tag a ser inserida/removida
+            if (this.hasTag(userSelection.anchorNode, command)) {
+                // Deleta a tag
+                this.deleteOuterElement((<HTMLElement>userSelection.anchorNode), command);
             } else {
+                // Cria um elemento Range para envolver com a tag
                 const selectedTextRange = userSelection.getRangeAt(0);
+                // Insere a tag
                 selectedTextRange.surroundContents(styleElement);
             }
         }
@@ -81,19 +91,37 @@ export class RichTextComponent implements OnInit {
         userSelection?.removeAllRanges();
     }
 
-    deleteOuterElement(userSelection: Selection, htmlElement: HTMLElement) {
-        if (userSelection.anchorNode && userSelection.anchorNode.parentElement) {
-            let el: Node = {} as Node;
+    deleteOuterElement(htmlElement: HTMLElement, tag: string) {
+        if (htmlElement) {
+            if(htmlElement.nodeName.toUpperCase() == tag.toUpperCase()) {
+                let insertNodes: Node[] = [];
+                let parentEl: HTMLElement = htmlElement.parentElement ? htmlElement.parentElement : {} as HTMLElement;
 
-            if(htmlElement.localName) {
-                el = htmlElement;
+                parentEl.childNodes.forEach((node: Node, i: number) => {
+                    if(node == htmlElement) {
+                        if(htmlElement.localName) {
+                            htmlElement.childNodes.forEach((node: Node) => {
+                                insertNodes.push(node);
+                            })
+                        } else {
+                            insertNodes.push(document.createTextNode(htmlElement.nodeValue ? htmlElement.nodeValue : ""));
+                        }
+                    } else {
+                        insertNodes.push(node);
+                    }
+                })
+
+                parentEl.childNodes.forEach((node: Node) => {
+                    parentEl.removeChild(node);
+                })
+
+                insertNodes.forEach((node: Node) => {
+                    parentEl.appendChild(node);
+                })                
             } else {
-                el = document.createTextNode(userSelection.anchorNode.parentElement.innerHTML);
-            }
-
-            if (htmlElement.parentElement && htmlElement.parentElement.parentElement) {
-                htmlElement.parentElement.parentElement.appendChild(el);
-                htmlElement.parentElement.parentElement.removeChild(htmlElement.parentElement);
+                if(htmlElement && htmlElement.parentElement) {
+                    this.deleteOuterElement(htmlElement.parentElement, tag);
+                }
             }
         }
     }
@@ -104,11 +132,11 @@ export class RichTextComponent implements OnInit {
         if (userLink) {
             if (/http/i.test(userLink)) {
                 console.log(userLink);
-                // this.modifyText(`<a href="${userLink}" target="blank"></a>`);
+                this.modifyText(`a`, userLink);
             } else {
                 userLink = "http://" + userLink;
                 console.log(userLink);
-                // this.modifyText(`<a href="${userLink}" target="blank"></a>`);
+                this.modifyText(`a`, userLink);
             }
         }
     }
@@ -161,6 +189,17 @@ export class RichTextComponent implements OnInit {
         
         this.valueChange.emit(this.textarea.nativeElement.innerHTML);
     }
+
+    getHTML(element: Element) {
+        this.textarea.nativeElement.style.fontFamily = 'sans-serif';
+        this.textarea.nativeElement.style.margin = '0';
+        this.textarea.nativeElement.style.boxSizing = 'border-box';
+
+        const htmlText: string = this.textarea.nativeElement.outerHTML;
+        const data = new Blob([htmlText], {type: 'text/plain'});
+        const textFile = window.URL.createObjectURL(data);
+
+        element.setAttribute('href', textFile);
+    }   
         
 }
-    
